@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>List Smartphone</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        function showList() {
+            $.ajax({
+                type: "GET",
+                url: "/city",
+                success: function (data) {
+                    let conten = ` <tr>
+        <th>#</th>
+        <th>Thành phố</th>
+        <th>Quốc Gia</th>
+        <th>Action</th>
+    </tr>`;
+                    for (let i = 0; i < data.length; i++) {
+                        conten += getCity(data[i])
+                    }
+                    document.getElementById("table").innerHTML = conten
+                }
+            });
+        }
+
+        function getCity(city) {
+            return ` <td>${city.id}</td>
+<td>${city.name}</td>
+<td>${city.country}</td>`
+        }
+
+        function deleteCity(id) {
+            $('#delete-city').click(function (event) {
+                $.ajax({
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    type: 'delete',
+                    url: "/city/" + id,
+                    data: JSON.stringify(id),
+                    success: showList
+                });
+                event.preventDefault()
+            });
+        }
+
+        function addNewCity() {
+            let area = $('#areaCity').val();
+            let comment = $('#commentCity').val();
+            let name = $('#nameCity').val();
+            let population = $('#populationCity').val();
+            let country = $('#country').val();
+            let GDP = $('#GDP').val();
+            let newCity = {
+                area: area,
+                comment: comment,
+                name: name,
+                population: population,
+                country: country,
+                GDP:GDP,
+            };
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                type: "POST",
+                data: JSON.stringify(newCity),
+                url: "/city",
+                success: showList
+            })
+        }
+
+        function showForm(){
+let formCity=`
+<form>
+<h3>Create City</h3>
+  <div class="form-group">
+  <label for="accountUser" class="form-label" style="margin-left: fill">Ten</label>
+  <input type="text" class="form-control" id="nameCity">
+</div>
+<div class="form-group">
+  <label for="accountUser" class="form-label" style="margin-left: fill">Quoc Gia</label>
+  <input type="text" class="form-control" id="country">
+</div>
+<div class="form-group">
+  <label for="accountUser" class="form-label" style="margin-left: fill">Dien tich</label>
+  <input type="text" class="form-control" id="areaCity" >
+</div>
+<div class="form-group">
+  <label for="accountUser" class="form-label" style="margin-left: fill">Dan so</label>
+  <input type="text" class="form-control" id="populationCity" >
+</div>
+<div class="form-group">
+  <label for="accountUser" class="form-label" style="margin-left: fill">GDP</label>
+  <input type="text" class="form-control" id="#GDP" >
+</div>
+<div class="form-group">
+  <label for="accountUser" class="form-label" style="margin-left: fill">Comment</label>
+  <input type="text" class="form-control" id="commentCity" >
+</div>
+</form>
+
+`
+        }
+    </script>
+
+</head>
+<body>
+<!--Modal delete city-->
+<div class="modal fade" id="deleteCity" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Are you sure ?</h5></b>
+                <input type="hidden">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" id="delete-city" class="btn btn-danger ">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1>
+    Danh danh sach thanh pho
+</h1>
+<div class="btn btn-primary">
+    <button onclick=" showForm()" class="btn btn-primary">Add New User</button>
+
+</div>
+<table class="table table-striped" id="table">
+    <tr>
+        <th>#</th>
+        <th>Thành phố</th>
+        <th>Quốc Gia</th>
+        <th>Action</th>
+    </tr>
+    <th:block th:each="city:${city}">
+
+        <tr>
+            <td th:text="${city.id}"></td>
+            <td th:text="${city.name}"></td>
+            <td th:text="${city.country}"></td>
+            <td>
+                <button onclick="deleteCity(this.id)" type="button" class="btn btn-danger" data-bs-toggle="modal"
+                        data-bs-target="#deleteCity" id="${city.id}">
+                    Delete
+                </button>
+                <button type="button" onclick="editCity(this.id)" id="${city.id}"
+                        class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#editCity">Edit
+                </button>
+            </td>
+        </tr>
+    </th:block>
+
+</table>
+</body>
+</html>
